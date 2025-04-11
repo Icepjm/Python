@@ -1,0 +1,75 @@
+# 第一步 将彩图转化为灰度图像 灰度图像本质上就是三维数组（数据类型为:numpy.ndarray）
+# 第二步 灰度图像转化为一维数组
+# 第三步 k—means聚簇
+
+import cv2, random
+import numpy as np
+from PIL import Image
+import time
+
+def tran_static_tran(image, k, im):
+    if type(image) != np.ndarray:
+        image = np.array(image)
+    # print(image, type(image))
+    height, width, *_ = image.shape
+    color = []
+    color
+    for i in range(height):
+        color_row = []
+        for j in range(width):
+            pixel = im.getpixel((j, i))
+            color_row.append(pixel)
+        color.append(color_row)
+    # print(height, width)
+    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    image_array = np.float32(image_gray.reshape(-1))
+    criteria = (cv2.TERM_CRITERIA_EPS+cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0) # 第一个参数是按位或运算，所以两个参数颠倒也没事
+    flags = cv2.KMEANS_RANDOM_CENTERS
+    compactness, labels, centroids = cv2.kmeans(image_array, k, None, criteria, 10, flags)
+    # print(labels, type(labels))
+    bright = [abs((3*i-2*k)/3*k) for i in range (1, k+1)]
+    shadow = [abs((3*i-k)/3*k) for i in range(1, 1+k)]
+    bright_bound = bright.index(min(bright))
+    shadow_bound = shadow.index(min(shadow))
+    '''
+    二维数组转化为一维数组的两种方法
+    '''
+    centroids = centroids.flatten() # 第一种
+    labels = labels.reshape(-1) # 第二种 不会改变数据类型
+    # print(labels, type(labels))
+    centroids_sorted = sorted(centroids)
+    centroids_index = np.array([centroids_sorted.index(value) for value in centroids])
+    labels = centroids_index[labels]
+    # print(centroids_index, type(centroids_index))
+    # print(labels, type(labels))
+    labels_picked = [labels[row*width: row*width+width] for row in range(0, height)]
+    # 创建画布
+    canvas = np.zeros((3*height, 3*width, 3), np.uint8)
+    canvas.fill(255)
+    # print(labels_picked, type(labels_picked))
+    y = 0
+    for row in labels_picked:
+        x = 0
+        for col in row:
+            if col <= shadow_bound:
+                cv2.putText(canvas, str(random.randint(0, 9)), (x, y), cv2.FONT_HERSHEY_PLAIN, 0.5, color[int(y/3)][col]) # sequence[int] 表示任何可迭代数据，但内部元素要是整形
+            elif col <= bright_bound:
+                cv2.putText(canvas, '-', (x, y), cv2.FONT_HERSHEY_PLAIN, 0.5, color[int(y/3)][col])
+            x += 3
+        y += 3
+    # print(canvas)
+    cv2.imwrite('./output_2.jpg', canvas)
+
+
+
+if __name__ == '__main__':
+    # file = '懒.jpg' # 包含中文名称解码不通过
+    img = 'LYY.jpg'
+    im = Image.open('LYY.jpg')
+    # file = '懒.jpg'
+    # file = file.encode('utf-8').decode('utf-8') # 不一定管用
+    img = cv2.imread(img) # openCV加载图片的时候，默认以BGR格式加载
+    # print(type(file))
+    # print(img) # 如果是 None 代表加载失败
+    # print(type(img))
+    tran_static_tran(img, 5, im)
