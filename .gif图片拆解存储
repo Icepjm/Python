@@ -1,0 +1,35 @@
+def tran_ascii(image, ascii_map, font, current):
+    # print('tran_ascii_目录改变前'+os.getcwd())
+    os.chdir('tmp')
+    # print('tran_ascii_执行前'+os.getcwd())
+    im = Image.open(image)
+    # print('im.open执行后')
+    im = im.convert('RGB')
+    left, top, right, low = font.getbbox(' ')
+    font_width = right-left
+    font_height = top
+    h = int(im.height/font_height)
+    w = int(im.width/font_width)
+    im = im.resize((5*w,5*h), Image.Resampling.LANCZOS)
+    # 取
+    text = []
+    color = []
+    for i in range(5*w):
+        text_tmp = []
+        color_tmp = []
+        for j in range(5*h):
+            pixel = im.getpixel((i, j))
+            text_tmp.append(get_chars(pixel, ascii_map))
+            color_tmp.append((pixel[0], pixel[1], pixel[2]))
+        text.append(text_tmp)
+        color.append(color_tmp)
+    # 画
+    image_1 = Image.new('RGB', (40*w, 40*h), (255, 255, 255))
+    draw = ImageDraw.Draw(image_1)
+    for i in range(5*w):
+        for j in range(5*h):
+            draw.text((i*font_width*2, j*font_height*2), text[i][j], color[i][j]) # 数量不变,但是更分散,显得会更大
+            # draw.text((i * font_width , j * font_height ), text[i][j], color[i][j])
+    image_1.save('../tmp_ascii/'+"ascii--"+str(current)+'.png')
+    # print('tran_执行完毕')
+    # image.show() # 用于显示图片
