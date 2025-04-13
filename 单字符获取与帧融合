@@ -1,0 +1,21 @@
+def get_chars(pixel, ascii_map):
+    gray_val = 0.299*pixel[0]+0.587*pixel[1]+0.114*pixel[2]
+    length = len(ascii_map)
+    return ascii_map[int(length*gray_val/256)]
+
+
+def fuse_ascii(path_ascii, outname):
+    list_ascii = []
+    os.chdir('./tmp_ascii')
+    # for file in path_ascii: # path_ascii 只会被当作一个字符串
+    # for file in os.listdir(path_ascii):
+    #     str_ascii = imageio.v2.imread(file) # 确保当前程序执行目录下面有文件
+    #     list_ascii.append(str_ascii)
+    # print(type(list_ascii))
+    # print(list_ascii)
+    # imageio.mimsave(outname, list_ascii, duration=1000)
+
+    for file in os.listdir(path_ascii):
+        im = Image.open(file)
+        list_ascii.append(im)
+    list_ascii[0].save('../come/'+outname, save_all = True, append_images = list_ascii[1:], duration = 1000, loop=2)
