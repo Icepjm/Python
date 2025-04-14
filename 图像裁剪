@@ -1,0 +1,65 @@
+import matplotlib
+
+'''
+matplotlib.use() 函数用于设置当前的后端（backend）。
+后端是matplotlib用来与操作系统进行交互的部分，它负责处理绘图、用户输入、事件处理等任务。
+matplotlib支持多个后端，例如Tkinter、Qt、GTK、WX、Qt4、GTK3等，每个后端都有其特定的用途和特性。
+
+matplotlib.use() 必须在导入 pyplot 或 pylab 之前调用的原因在于，这两个模块在导入时会自动选择一个默认的后端。
+一旦后端被设置，就不能再更改了。    因此，如果你想在程序中使用特定的后端，必须在导入 pyplot 或 pylab 之前调用 matplotlib.use() 来指定后端。
+'''
+
+'''
+报错：
+    backend_interagg: matplotlib的一个后端模块（matplotlib和操作系统进行交互的部分），在没有图形化界面时候绘制图像
+    FigureCanvas:matplotlib中用于创建和管理“图形画布”的类。图形绘制的核心部分，所有图形元素都在画布上进行配置。
+'''
+# 必须在导入pyplot前,应为导入pyplot的时候会指定后端，一旦后端指定便不可更改
+matplotlib.use('TkAgg')  # 放在导入 pyplot 之前 # 解决了默认后端配置错误或依赖缺失的问题。
+'''
+后端：决定图像如何被渲染和显示
+    eg:
+        `TkAgg：基于 Tkinter 库（Python 内置 GUI 工具包）。
+        Qt5Agg：基于 Qt 库（需要额外安装 PyQt5/PySide2）。
+        Agg：生`成静态图片（不依赖 GUI，适合服务器环境）。
+'''
+from matplotlib import pyplot as plt
+import cv2
+
+# 加载文件
+image = cv2.imread('zxc.jpg')  # 不能是中文名
+height, weight, *_ = image.shape
+# print(image)
+# print("weight:",weight,' ', 'height:', height) # 940 940
+# print(_) # [3]
+'''
+转灰度图像：
+    ①计算量少：灰度图像只有一个通道，相比于彩色图像（RGB）三个通道，处理速度快，计算资源少
+    ②简化问题：边缘检测，特征提取，灰度图像可以简化问题，提高算法效率
+    ③减少数据量：灰度图像的数据量更小，便于存储和传输。 
+'''
+image_grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+# print(image_grey)
+# for i in range(len(image)):
+#     print(f'第{i}行：', image[i])
+# for i in range(len(image_grey)):
+#     print(f'第{i}行',image_grey[i])
+print(len(image[1]), len(image_grey))
+'''
+image_toilored, *_ = image[:][:500] # 一共分成 500份, 其中 _ 占据499份 这么写有问题
+for item in _[0]:
+    print(item, len(item ))
+
+print(len(_[0]), 'len(_[0])') # 940 一份 940个元素
+print(len(_), 'len(_)') # 499, 表示分到了499个元素
+print(type(image_toilored), type(_))
+'''
+
+image_toilored = image_grey[:, :500]  # 逗号用于分割不同的维度 ——原来如此
+height_t, width_t = image_toilored.shape
+print(height_t, width_t)  # (height, width)
+print(type(image_toilored))  # numpy.ndarray
+plt.xticks(ticks=[50, 100, 150, 200, 499], labels=['A', 'B', 'C', 'D', 'E'])  # 表示x轴显示的内容 # tickes['像素位置']
+plt.yticks([])  # 表示y轴显示的内容   ticks 和 labels 中的元素要一一对应，否则报错
+plt.imshow(image_toilored)
+plt.show()
