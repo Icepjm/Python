@@ -1,0 +1,14 @@
+# 图像平滑
+import cv2
+import matplotlib
+matplotlib.use('TkAgg')
+from matplotlib import pyplot as plt
+image = cv2.imread('zxc.jpg')
+'''
+(100, 1) 表示 100*1的扁平长条 x:100, y:1
+(100, 1) # x比较大， y比较小， 表示x轴会比较模糊，应为取得值多，然后各个像素点的颜色数据会显得更平均 
+(1, 100) # x比较小， y比较大， 表示x轴比较清晰，y轴会比较模糊
+'''
+image_filter = cv2.blur(image, (100, 1)) # 如果糊的不明显表示图片比较平滑，可以将卷积核取的大一点
+plt.imshow(image_filter)
+plt.show()
