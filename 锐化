@@ -1,0 +1,23 @@
+import cv2
+import numpy as np
+import matplotlib
+matplotlib.use('TkAgg')
+from matplotlib import pyplot as plt
+image = cv2.imread('zxc.jpg')
+# 锐化核 （特殊的卷积核）
+# 卷积核中各个元素相加为1 ——保持亮度不变（比一大：总亮度增加，比一小：总亮度减少）
+sharpen_kernal = np.array([
+    [0, -2, 0],
+    [-2, 9, -2],
+    [0, -2, 0]
+])
+'''
+图像、深度、锐化核
+深度：图像中每个参数的位数
+    深度（-1）：表示和原图相同 
+    合理深度参数：-1、 8、 16、 32、 64   位数越多，提供更高的精度，和更大的数值范围， 适合科学计算和高级图像处理。处理速度会更慢
+'''
+image_sharpen = cv2.filter2D(image, -1, sharpen_kernal)
+plt.imshow(image_sharpen)
+plt.show()
+
