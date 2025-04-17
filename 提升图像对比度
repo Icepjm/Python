@@ -1,0 +1,41 @@
+import cv2
+import matplotlib
+matplotlib.use("TkAgg")
+from matplotlib import pyplot  as plt
+import numpy as np
+'''
+1、线性变化（调整亮度和对比度）
+.convertScaleAbs() 
+参数：
+    alpha:（1）>1 对比度提升
+          （2）<1 对比度下降
+    beta: （1）正数：亮度增加
+          （2）负数：亮度减少
+          （3）···Abs()返回绝对值，所以负的太多的话亮度会提升
+          （八位表示）范围：0-255
+'''
+# image = cv2.imread("zxc.jpg")
+# image_contrast = cv2.convertScaleAbs(image, alpha=1.6, beta=10)
+# plt.imshow(image_contrast)
+# plt.show()
+'''
+直方图均衡化：
+    Histogram：直方图
+'''
+image = cv2.imread('zxc.jpg')
+image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+if image.dtype != np.uint8:
+    print('转换')
+    image = image.astype(np.uint8)
+image_equalize= cv2.equalizeHist(image)
+# plt.imshow(image)
+'''
+cmap='gray' 表示图像映射方式
+image_equalize（1）是灰度图像：没有指定cmap='gray'——伪彩色
+                        指定cmap='gray'——灰度图像
+              （2）彩色图像——默认按照原色映射
+'''
+plt.imshow(image_equalize, cmap='gray')
+plt.show()
+# cv2.waitKey(0)
+cv2.destroyAllWindows()
