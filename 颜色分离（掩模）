@@ -1,0 +1,57 @@
+'''
+HSV(色调、饱和度、明度):
+    明度：一种颜色对于其他颜色的明暗程度
+    H:(0,180)
+    S:(0,255)
+        eg:120 : 120/255 约等于 0.47
+    V:(0,255)
+'''
+import cv2
+import matplotlib
+
+matplotlib.use('TkAgg')
+from matplotlib import pyplot as plt
+import numpy as np
+
+image_bgr = cv2.imread('zxc.jpg')  # 默认转换为 BGR格式
+print(image_bgr.shape)
+image_hsv = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2HSV)  # 如果不是从BGR格式转换，会导致色调值计算错误
+'''
+# 检测图像中的红色区域
+lower_red1 = np.array([0, 120, 50])
+upper_red1 = np.array([10, 255, 255])
+lower_red2 = np.array([170, 120, 50])
+upper_red2 = np.array([180, 255, 255])
+mask1 = cv2.inRange(image_hsv, lower_red1, upper_red1)
+mask2 = cv2.inRange(image_hsv, lower_red2, upper_red2)
+mask = cv2.bitwise_or(mask1, mask2)
+'''
+'''
+高亮度 + 高饱和度的颜色（如亮黄、亮蓝）会被错误检测为“白色”。
+若将饱和度范围设为 S=10~255，会引入大量非白色的彩色区域（例如暗红色、暗蓝色等），因为它们可能具有高饱和度但低明度。
+'''
+lower_white = np.array([0, 0, 160])  # 明度范围： 160-255
+upper_white = np.array([180, 60, 255])  # 饱和度范围 0-60， 过滤出低饱和度颜色-白色（颜色鲜艳的被过滤）
+'''
+# 输出 单通道二值图像
+二值图像（Binary Image）是一种特殊的单通道图像，每个像素值只能是两种值：
+    0（纯黑）：表示“不感兴趣”的区域。
+    255（纯白）：表示“感兴趣”的区域（例如目标物体）。
+本质：用黑白两种颜色标记图像中的逻辑区域（是/否）。
+'''
+mask = cv2.inRange(image_hsv, lower_white, upper_white)
+'''
+cv2.bitwise_and(src1, src2, dst=None, mask=None)
+dst(x,y) = src1(x,y) & src2(x,y) , if mask(x,y) ≠ 0
+dst(x,y) = 0                     , if mask(x,y) = 0
+掩膜的作用：仅在掩膜为白色的区域（非零）执行按位与操作，其他区域直接置零。
+按位与操作需要两个输入源，但此处目的是通过 mask 过滤单张图像。
+对同一图像做 A & A 等效于保留原值（与 A | A 等效），但需依赖 mask 参数控制区域。
+'''
+image_bgr_mask = cv2.bitwise_and(image_bgr, image_bgr, mask)
+image_bgr = cv2.cvtColor(image_bgr_mask, cv2.COLOR_BGR2RGB)
+plt.imshow(image_bgr_mask) # 颜色保留-只显示蒙版部分
+plt.axis('off')  # 不显示——横纵轴坐标
+plt.show()
+plt.imshow(mask) # 蒙版部分-伪彩色
+plt.axis('off'), plt.show()
