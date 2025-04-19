@@ -1,0 +1,26 @@
+import cv2
+import matplotlib
+matplotlib.use('TkAgg')
+from matplotlib import pyplot as plt
+image_grey = cv2.imread('zxc.jpg', cv2.IMREAD_GRAYSCALE)
+'''
+adaptiveThreshold()函数的输出严格二值化，
+所以改变max_output_value的值不会影响输出，
+但是为0的话，全黑
+'''
+max_output_value = 255 # 当像素值超过局部阈值时，会被设置为 max_output_value
+neighborhood_size = 111
+'''
+substract_from_mean（从均值中减去的常数） 人为调整阈值范围，正数——降低阈值
+                                   负数——调高阈值
+'''
+substract_from_mean = 10 # 影响二值化的敏感度
+image_binarized = cv2.adaptiveThreshold(image_grey,
+                                        max_output_value,
+                                        cv2.ADAPTIVE_THRESH_GAUSSIAN_C, # 高斯加权平均法计算局部阈值
+                                        cv2.THRESH_BINARY, # 阈值类型 像素值大于阈值：255（白色） 小于0（黑色）
+                                        neighborhood_size, # 局部区域大小（99x99）必须是奇数 因为又明确中心，eg 4x4没有中心（无法计算-报错）
+                                        substract_from_mean) # 从计算的均值中减去的常数
+plt.imshow(image_binarized, cmap='gray') # 指定要显示的图像
+plt.axis('off')
+plt.show() # 显示图像
