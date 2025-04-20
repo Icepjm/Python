@@ -1,0 +1,60 @@
+import cv2, numpy as np
+import matplotlib
+
+matplotlib.use('TkAgg')
+from matplotlib import pyplot as plt
+
+image_bgr = cv2.imread('zxc.jpg')
+image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
+rectangle = (400, 100, 500, 500)
+'''
+mask中：
+    0：明确背景
+    1：明确前景
+    2：可能背景
+    3：可能前景
+'''
+mask = np.zeros(image_rgb.shape[:2], np.uint8)
+print(type(image_rgb.shape[:2]))  # tuple
+'''
+（1, 65） 1：因为一个GMM模型
+         65：均值（Mean）：{
+                            3 个值（RGB 三通道）
+                            协方差矩阵（Covariance）：6 个独立值（对称矩阵）
+                            权重（Weight）：1 个值
+                            因此，每个高斯分量需要 3 + 6 + 1 = 10 个参数。
+                            5 个分量共需 5 × 10 = 50 个参数。
+                            OpenCV 的实现中，额外预留了 15 个参数用于算法内部优化或其他计算，因此总维度为 50 + 15 = 65。
+                          }
+'''
+
+bgdModel = np.zeros((1, 65), np.float64)  # OpenCV的硬性要求
+fgbModel = np.zeros((1, 65), np.float64)  # 用于存放计算过程中的数据
+cv2.grabCut(image_rgb,
+            mask,
+            rectangle,  # (x, y, w, h) 大致框定前景对象位置
+            bgdModel,
+            fgbModel,
+            5,  # 迭代次数，高-过拟合， 低-分割不充分
+            cv2.GC_INIT_WITH_RECT)  # GC:GrabCut INIT_WITH_RECT:使用矩形框初始化算法
+'''
+cv2.GC_INIT_WITH_RECT通过矩形框提供初始分割信息，帮助算法建立颜色模型并启动优化。
+必要性：初始化是GrabCut算法的核心步骤，确保后续迭代有合理的起点。
+灵活性：用户可根据需求选择矩形初始化或掩模初始化，平衡效率与精度。
+'''
+'''
+将原来2的位置置换为0， 0-1
+.astype('uint8') 
+    尽管 np.where 生成的数组包含 0 和 1，
+    但其默认数据类型可能是布尔型或整数型（如 int64），
+    而图像处理中通常要求数据类型为 uint8（无符号8位整数）。
+'''
+mask_2 = np.where((mask == 2) | (mask == 0), 0, 1).astype('uint8')
+'''
+np.newaxis: 扩展维数（此处从二维->三维）
+image_rgb * mask_2 : 掩模为 0 的位置，RGB 三通道值均变为 0；掩模为 1 的位置，保留原值。
+'''
+image_rgb_nobg = image_rgb * mask_2[:, :, np.newaxis]
+plt.imshow(image_rgb_nobg)
+plt.axis('off')
+plt.show()
