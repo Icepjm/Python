@@ -1,0 +1,73 @@
+import cv2
+import numpy as np
+import matplotlib
+
+matplotlib.use('TkAgg')
+from matplotlib import pyplot as plt
+
+# image_bgr = cv2.imread('zxc.jpg')
+# median_rgb = np.median(image_bgr, axis=2)
+# print(median_rgb)
+# print('----------------------------')
+image_gray = cv2.imread("zxc.jpg", cv2.IMREAD_GRAYSCALE)
+# print(image_gray)
+'''
+        二    维
+np.median(arr) 全局计算中位数
+np.median(arr, axis=0) 按列计算中位数
+np.meidan(arr, axis=1) 按行计算中位数
+ 
+
+'''
+median_intensity = np.median(image_gray)
+print('median_intensity:')
+print(median_intensity, type(median_intensity))
+'''
+高阈值。梯度强度高于这个阈值的像素点将被认为是强边缘。
+介于低阈值和高阈值之间的像素点将被认为是弱边缘，并且只有当它们与强边缘相连时才会被保留。
+'''
+# 梯度值 高于 此阈值的像素会被直接标记为强边缘（保留为最终边缘）。
+lower_threshold = int(max(0, (1.0 - 0.33) * median_intensity))
+'''
+梯度值 低于 此阈值的像素会被直接抑制（视为非边缘）。
+梯度值介于 lower_threshold 和 upper_threshold 之间的像素，仅当与强边缘（高于 upper_threshold）连接时，才被保留为边缘。
+'''
+upper_threshold = int(min(255, (1.0 + 0.33) * median_intensity))
+'''
+梯度大 → 亮度变化明显 → 通常对应物体边缘（如Canny检测的目标）。
+颜色跳跃明显 → 可能是亮度变化，也可能是色相/饱和度变化，需结合具体颜色空间分析。
+若需检测纯颜色边界（如红-绿），需在合适的颜色空间中操作。
+'''
+image_canny = cv2.Canny(image_gray, lower_threshold, upper_threshold)
+plt.imshow(image_canny, cmap='gray')
+plt.axis('off')
+plt.show()
+
+# import random
+# num = 5
+# list1 = []
+# for dep in range(num):
+#     list2 = []
+#     for row in range(3):
+#         list3 = []
+#         for col in range(2):
+#             list3.append(random.randint(2, 10))
+#         list2.append(list3)
+#     list1.append(list2)
+# for i in range(num):
+#     print(f'第{i}:')
+#     print(list1[i])
+
+# for i in range(len(list1[1])):
+#     print(f"{i}:")
+#     print(list1[1][i])
+'''
+三维数组：
+    arr_median = np.meidan(arr) arr_median 为单个数值， 相当于所有元素的中位数
+    arr_median = np.median(arr, axis=0) 按深度：每一层的第一个元素——按列求中位数、 每一层有多少个元素，arr_median就有多少元素
+    arr_median = np.meidan(arr, axis=1) arr_median元素数 = 层数   一层中，每一个元素的同一列——计算中位数，元素列数=arr的元素列数
+    arr_median = np.median(arr, axis=2) arr_median元素数 = 层数   一层中，每一个元素同一行——计算中位数， 元素列数=arr元素数
+'''
+# print(len(list1))
+# list1_median = np.median(list1, axis=2 )
+# print(list1_median)
