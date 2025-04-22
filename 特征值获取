@@ -1,0 +1,30 @@
+import numpy as np
+import matplotlib, cv2
+matplotlib.use("TkAgg")
+from matplotlib import pyplot as plt
+image_gray = cv2.imread('zxc.jpg', cv2.IMREAD_GRAYSCALE)
+print(image_gray)
+'''
+最近邻插值（INTER_NEAREST）：
+直接取原图中最近的整数坐标像素值，对应位置更明确。
+
+双线性插值（INTER_LINEAR）：
+综合周围4个像素的加权值，新像素的位置对应原图的浮点坐标。
+
+区域平均（INTER_AREA）：
+对原图对应区域内的像素取平均，适合缩小图像。
+'''
+image_gray_10x10 = cv2.resize(image_gray, (10, 10), cv2.INTER_NEAREST)
+print(image_gray_10x10.shape)
+print(image_gray_10x10)
+plt.imshow(image_gray_10x10)
+plt.axis('off')
+plt.show()
+'''
+特征向量——特征向量通常是从数据中提取出的、用于描述数据特定属性的一系列数值。
+在图像处理中，特征向量可以用来表示图像的颜色、纹理、形状等特征。
+'''
+image_flatten = image_gray_10x10.flatten() # 一维数组
+print(image_flatten, type(image_flatten)) # numpy.ndarray
+# 特征向量的维度大小
+print(image_flatten.shape) # (100,)
