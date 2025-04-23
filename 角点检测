@@ -1,0 +1,69 @@
+import cv2, numpy as np
+import matplotlib
+
+matplotlib.use("TkAgg")
+from matplotlib import pyplot as plt
+
+image_bgr = cv2.imread('zxc.jpg')
+image_gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
+image_gray = np.float32(image_gray)
+'''
+block_size:
+    越大 ——> 计算范围越大 ——> 检测的角点越粗
+    邻域范围越大——>计算范围越大——>抗噪能力越强，同时邻近细节被合并为一个“粗”的角点
+        抗噪能力强：
+            噪声在统计过程中被平均，而非简单过滤
+    邻域范围越小——>计算方位越小——>抗噪能力下降，同时角点定位更精确（如单个像素点）
+'''
+block_size = 5
+'''
+aperture:  
+    Sobel算子的孔径大小（必须为奇数） 
+    值越大：Sobel算子对梯度的响应越平滑，但计算量增加。
+    Sobel=3 => 3x3的核。
+    简化了局部突变（如噪声）使突变变化更平缓 
+    Sobel算子孔径越大——>角点数量越少
+'''
+aperture = 29
+'''
+free_parameter（=k）:
+    自由参数：用于调节角点检测的敏感度
+    k值越大，检测到的角点越少（更严格的筛选）
+    k值越小，角点数量增加，但是可能包含更多边缘和噪声
+'''
+free_parameter = 0.02
+detertor_responses = cv2.cornerHarris(image_gray,
+                                      block_size,
+                                      aperture,
+                                      free_parameter,
+                                      ) # 返回一个和输入图像同尺寸的浮点数组（表示每个像素对应的角点响应值）
+# print(detertor_responses) # 输出浮点数组（各个像素对应的角点响应值———>越高表示该点是角点的可能性越高）
+'''
+cv2.dilate()：
+    膨胀函数
+    会扩张图像中的亮区域（高响应区域），使其边缘向外扩展
+    None:表示使用默认（3x3）的核来扩展
+'''
+detertor_responses = cv2.dilate(detertor_responses, None)
+# print(detertor_responses)
+threshold = 0.02
+image_bgr[detertor_responses > threshold * detertor_responses.max()] = [255, 255, 255]
+# print("detertor_responses:",detertor_responses, type(detertor_responses))
+print("threshold_detertor:", threshold*detertor_responses.max(),type(threshold*detertor_responses.max()))
+image_gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
+# plt.imshow(image_gray, cmap='gray')
+# plt.axis('off')
+# plt.show()
+
+
+import random
+list1 =[]
+for i in range(10):
+    list1.append(random.randint(1, 9))
+print(list1)
+# list1[list1 > 1 ]=[100] 错误，列表不支持布尔索引
+'''
+list1 = np.array(list1) # 先将列表转化为 ndarray类型的数据
+list1[list1>6]=[100]
+'''
+print(list1)
